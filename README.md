@@ -1,4 +1,4 @@
-# Portfolio
+# Yılmaz Sayar Web 
 
 Kişisel portfolio sitesi. Vue 3, Vite ve Tailwind CSS ile geliştirilmiş; tema rengi seçici ve TR/EN dil desteği içerir.
 
