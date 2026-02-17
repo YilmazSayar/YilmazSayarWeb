@@ -270,7 +270,8 @@ const contactLinks = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/y%C4%B1lmaz-sayar?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app', icon: 'LinkedIn' },
 ]
 
-const contactEmail = 'sayaryilmaz2004@gmail.com'
+/** E-posta adresi – dile göre değişmez */
+const EMAIL_ADDRESS = 'sayaryilmaz2004@gmail.com'
 
 const marqueeSkills = skillCategories.flatMap((cat) => cat.items)
 
@@ -511,7 +512,8 @@ const aboutText = computed(() => (locale.value === 'tr' ? aboutTextTr : aboutTex
             </a>
           </div>
           <p class="text-sm text-zinc-400 transition-colors duration-200 hover-accent-text">
-            {{ t.contactEmailLabel }}: {{ contactEmail }}
+            {{ t.contactEmailLabel }}:
+            <a :href="`mailto:${EMAIL_ADDRESS}`" class="accent-text">{{ EMAIL_ADDRESS }}</a>
           </p>
         </div>
       </section>
