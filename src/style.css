@@ -1,0 +1,58 @@
+@import 'tailwindcss';
+
+/* Tailwind v4: JS config (content paths) yüklü olsun diye */
+@config '../tailwind.config.js';
+
+/* Üst/alt beyaz şerit olmaması: tüm katmanlar siyah, viewport tam dolu */
+html {
+  margin: 0;
+  min-height: 100%;
+  background-color: #000000;
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  min-height: 100%;
+  background-color: #000000;
+}
+#app {
+  min-height: 100%;
+  background-color: #000000;
+}
+
+/* Tema rengi – kullanıcı seçimine göre güncellenir (varsayılan: zümrüt) */
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #10b981;
+}
+:root {
+  --accent: #10b981;
+  --accent-rgb: 16, 185, 129;
+}
+:root.color-cycle-active {
+  transition: --accent 0.2s ease;
+}
+
+/* Vurgu rengi kullanan sınıflar (siyah/beyaz değişmez) */
+.accent-text { color: var(--accent); }
+.accent-bg { background-color: var(--accent); }
+.accent-bg-soft { background-color: rgba(var(--accent-rgb), 0.9); }
+.accent-bg-muted { background-color: rgba(var(--accent-rgb), 0.1); }
+.accent-border { border-color: var(--accent); }
+.accent-border-soft { border-color: rgba(var(--accent-rgb), 0.4); }
+.accent-border-muted { border-color: rgba(var(--accent-rgb), 0.3); }
+.hover-accent-border:hover { border-color: var(--accent); }
+.hover-accent-bg:hover { background-color: rgba(var(--accent-rgb), 0.1); }
+.hover-accent-text:hover { color: var(--accent); }
+.accent-shadow { box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.4); }
+.accent-shadow-soft { box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.25); }
+.hover-accent-shadow:hover { box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.4); }
+.accent-gradient-bg {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(var(--accent-rgb), 0.18), transparent 55%),
+    radial-gradient(ellipse 120% 80% at 50% 50%, rgba(var(--accent-rgb), 0.08), transparent 65%);
+}
+.accent-skill-border { border-color: rgba(var(--accent-rgb), 0.3); }
+.accent-skill-bg { background-color: rgba(var(--accent-rgb), 0.1); }
+.accent-skill-text { color: rgba(var(--accent-rgb), 0.9); }
