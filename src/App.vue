@@ -101,6 +101,14 @@ function setLocale(lang) {
   try { localStorage.setItem(LOCALE_KEY, lang) } catch (_) {}
 }
 
+const colorPickerContainer = ref(null)
+
+function closeColorPickerOnClickOutside(e) {
+  if (showColorPicker.value && colorPickerContainer.value && !colorPickerContainer.value.contains(e.target)) {
+    showColorPicker.value = false
+  }
+}
+
 onMounted(() => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -111,6 +119,11 @@ onMounted(() => {
   } catch (_) {
     applyAccent(DEFAULT_ACCENT)
   }
+  document.addEventListener('click', closeColorPickerOnClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeColorPickerOnClickOutside)
 })
 
 const t = computed(() => ({
@@ -524,7 +537,7 @@ const aboutText = computed(() => (locale.value === 'tr' ? aboutTextTr : aboutTex
     </div>
 
     <!-- Tema rengi seçici -->
-    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div ref="colorPickerContainer" class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       <Transition name="picker">
         <div
           v-show="showColorPicker"
@@ -567,10 +580,10 @@ const aboutText = computed(() => (locale.value === 'tr' ? aboutTextTr : aboutTex
       </Transition>
       <button
         type="button"
-        class="flex h-14 w-14 items-center justify-center rounded-full border-2 border-zinc-600 bg-zinc-900 shadow-lg transition hover:border-zinc-500 hover:shadow-xl"
+        class="relative z-10 flex h-14 w-14 items-center justify-center rounded-full border-2 border-zinc-600 bg-zinc-900 shadow-lg transition hover:border-zinc-500 hover:shadow-xl"
         :style="{ borderColor: accentColor }"
         aria-label="Tema rengini değiştir"
-        @click="showColorPicker = !showColorPicker"
+        @click.stop="showColorPicker = !showColorPicker"
       >
         <span
           class="h-8 w-8 rounded-full"
