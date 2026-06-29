@@ -12,6 +12,7 @@ let mouseX = -99999
 let mouseY = -99999
 let time = 0
 let reduceMotion = false
+let pointerRepel = false
 
 const REPEL_RADIUS = 150
 const REPEL_STRENGTH = 22
@@ -139,11 +140,16 @@ onMounted(() => {
   reduceMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  pointerRepel =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches
   resize()
   window.addEventListener('resize', resize)
-  window.addEventListener('pointermove', onPointerMove, { passive: true })
-  window.addEventListener('blur', onPointerLeave)
-  document.addEventListener('mouseout', onDocMouseOut)
+  if (pointerRepel) {
+    window.addEventListener('pointermove', onPointerMove, { passive: true })
+    window.addEventListener('blur', onPointerLeave)
+    document.addEventListener('mouseout', onDocMouseOut)
+  }
   rafId = requestAnimationFrame(tick)
 })
 
