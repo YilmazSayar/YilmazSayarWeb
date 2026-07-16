@@ -172,7 +172,7 @@ const t = computed(() => ({
     menu: locale.value === 'tr' ? 'Menü' : 'Menu',
   },
   hero: {
-    status: locale.value === 'tr' ? 'Junior Software Developer - Technical Prasales' : 'Open — internship & projects',
+    status: locale.value === 'tr' ? 'Junior Software Developer - Technical Presales' : 'Open — internship & projects',
     role: locale.value === 'tr' ? 'Bilgisayar Mühendisi' : 'Computer Engineer',
     lead:
       locale.value === 'tr'
