@@ -213,7 +213,7 @@ const t = computed(() => ({
             { k: 'YIĞIN', v: 'Java · C# · Spring · .NET · Vue' },
           ]
         : [
-            { k: 'STATUS', v: 'Open — internship & projects', dot: true },
+            { k: 'STATUS', v: ' Technical Presales', dot: true },
             { k: 'FOCUS', v: 'Backend · AI · Full-stack' },
             { k: 'COMPANY', v: 'Seneka Yazılım — intern' },
             { k: 'LOCATION', v: 'Türkiye' },
