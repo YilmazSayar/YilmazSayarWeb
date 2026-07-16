@@ -1,29 +1,44 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import StarfieldBackground from './components/StarfieldBackground.vue'
-import HangingStickFigure from './components/HangingStickFigure.vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 
 const STORAGE_KEY = 'portfolio-accent-color'
 const LOCALE_KEY = 'portfolio-locale'
-const DEFAULT_ACCENT = '#10b981'
+const DEFAULT_ACCENT = '#f59e0b'
 
 const accentColor = ref(DEFAULT_ACCENT)
 const showColorPicker = ref(false)
-const colorCycleActive = ref(false)
-let cycleAnimationId = null
-const CYCLE_DURATION_MS = 12000
-let cycleStartTime = 0
+const mobileMenuOpen = ref(false)
 
 const presetColors = [
-  '#10b981', '#0ea5e9', '#8b5cf6', '#ec4899', '#f59e0b',
-  '#ef4444', '#14b8a6', '#6366f1', '#84cc16', '#f97316',
-  '#0004ff',
+  '#f59e0b', '#3b82f6', '#6366f1', '#8b5cf6', '#06b6d4',
+  '#14b8a6', '#10b981', '#f43f5e', '#ef4444', '#a1a1aa',
 ]
 
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '16, 185, 129'
+  return result
+    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+    : '245, 158, 11'
 }
+
+function applyAccent(hex) {
+  accentColor.value = hex
+  document.documentElement.style.setProperty('--accent', hex)
+  document.documentElement.style.setProperty('--accent-rgb', hexToRgb(hex))
+  try { localStorage.setItem(STORAGE_KEY, hex) } catch (_) {}
+}
+
+function chooseColor(hex) {
+  stopColorCycle()
+  applyAccent(hex)
+  showColorPicker.value = false
+}
+
+/* RGB modu — vurgu rengini renk çemberinde sürekli döndürür */
+const colorCycleActive = ref(false)
+const CYCLE_DURATION_MS = 12000
+let cycleAnimationId = null
+let cycleStartTime = 0
 
 function hslToHex(h, s, l) {
   h = h % 360
@@ -40,21 +55,8 @@ function hslToHex(h, s, l) {
   return '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')
 }
 
-function applyAccent(hex) {
-  accentColor.value = hex
-  document.documentElement.style.setProperty('--accent', hex)
-  document.documentElement.style.setProperty('--accent-rgb', hexToRgb(hex))
-  try { localStorage.setItem(STORAGE_KEY, hex) } catch (_) {}
-}
-
-function chooseColor(hex) {
-  stopColorCycle()
-  applyAccent(hex)
-  showColorPicker.value = false
-}
-
 function setAccentFromHue(hue) {
-  const hex = hslToHex(hue, 78, 55)
+  const hex = hslToHex(hue, 82, 58)
   accentColor.value = hex
   document.documentElement.style.setProperty('--accent', hex)
   document.documentElement.style.setProperty('--accent-rgb', hexToRgb(hex))
@@ -64,7 +66,7 @@ function runCycleStep(timestamp) {
   if (!cycleAnimationId) return
   if (cycleStartTime === 0) cycleStartTime = timestamp
   const elapsed = timestamp - cycleStartTime
-  const hue = (elapsed / CYCLE_DURATION_MS) * 360 % 360
+  const hue = ((elapsed / CYCLE_DURATION_MS) * 360) % 360
   setAccentFromHue(hue)
   cycleAnimationId = requestAnimationFrame(runCycleStep)
 }
@@ -78,6 +80,7 @@ function startColorCycle() {
 }
 
 function stopColorCycle() {
+  if (!colorCycleActive.value) return
   colorCycleActive.value = false
   document.documentElement.classList.remove('color-cycle-active')
   if (cycleAnimationId) {
@@ -93,58 +96,89 @@ function toggleColorCycle() {
   else startColorCycle()
 }
 
-onUnmounted(() => {
-  stopColorCycle()
-})
-
 const locale = ref('tr')
-
 function setLocale(lang) {
   locale.value = lang
   try { localStorage.setItem(LOCALE_KEY, lang) } catch (_) {}
 }
 
 const colorPickerContainer = ref(null)
-
 function closeColorPickerOnClickOutside(e) {
-  if (showColorPicker.value && colorPickerContainer.value && !colorPickerContainer.value.contains(e.target)) {
+  if (
+    showColorPicker.value &&
+    colorPickerContainer.value &&
+    !colorPickerContainer.value.contains(e.target)
+  ) {
     showColorPicker.value = false
   }
 }
-
 function toggleThemePicker() {
   showColorPicker.value = !showColorPicker.value
+}
+
+let revealObserver = null
+function initReveal() {
+  const els = document.querySelectorAll('[data-reveal]')
+  if (!('IntersectionObserver' in window)) {
+    els.forEach((el) => el.classList.add('is-in'))
+    return
+  }
+  revealObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in')
+          revealObserver.unobserve(entry.target)
+        }
+      })
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+  )
+  els.forEach((el) => revealObserver.observe(el))
+}
+
+function closeMenu() {
+  mobileMenuOpen.value = false
 }
 
 onMounted(() => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) applyAccent(saved)
-    else applyAccent(DEFAULT_ACCENT)
+    applyAccent(saved || DEFAULT_ACCENT)
     const savedLocale = localStorage.getItem(LOCALE_KEY)
     if (savedLocale === 'en' || savedLocale === 'tr') locale.value = savedLocale
   } catch (_) {
     applyAccent(DEFAULT_ACCENT)
   }
   document.addEventListener('click', closeColorPickerOnClickOutside)
+  nextTick(initReveal)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', closeColorPickerOnClickOutside)
+  if (revealObserver) revealObserver.disconnect()
+  stopColorCycle()
 })
 
 const t = computed(() => ({
   nav: {
-    home: locale.value === 'tr' ? 'Ana Sayfa' : 'Home',
     about: locale.value === 'tr' ? 'Hakkımda' : 'About',
+    skills: locale.value === 'tr' ? 'Yetenekler' : 'Skills',
+    experience: locale.value === 'tr' ? 'Deneyim' : 'Experience',
     education: locale.value === 'tr' ? 'Eğitim' : 'Education',
     projects: locale.value === 'tr' ? 'Projeler' : 'Projects',
-    experience: locale.value === 'tr' ? 'Deneyim' : 'Experience',
     contact: locale.value === 'tr' ? 'İletişim' : 'Contact',
     downloadCv: locale.value === 'tr' ? 'CV İndir' : 'Download CV',
+    menu: locale.value === 'tr' ? 'Menü' : 'Menu',
   },
   hero: {
-    title: locale.value === 'tr' ? 'Bilgisayar Mühendisi' : 'Computer Engineer',
+    status: locale.value === 'tr' ? 'Junior Software Developer - Technical Prasales' : 'Open — internship & projects',
+    role: locale.value === 'tr' ? 'Bilgisayar Mühendisi' : 'Computer Engineer',
+    lead:
+      locale.value === 'tr'
+        ? 'Yazılım projelerini yapay zeka ve makine öğrenmesiyle birleştiren bir mühendis adayı. Backend, API tasarımı ve modern web üzerine çalışıyorum.'
+        : 'An engineer-in-training combining software with AI and machine learning. I work on backend systems, API design and modern web.',
+    contact: locale.value === 'tr' ? 'İletişime geç' : 'Get in touch',
   },
   sections: {
     about: locale.value === 'tr' ? 'Hakkımda' : 'About',
@@ -154,10 +188,57 @@ const t = computed(() => ({
     skills: locale.value === 'tr' ? 'Yetenekler' : 'Skills',
     contact: locale.value === 'tr' ? 'İletişim' : 'Contact',
   },
-  themeColor: locale.value === 'tr' ? 'Tema rengi' : 'Theme color',
-  custom: locale.value === 'tr' ? 'Özel:' : 'Custom:',
-  contactEmailLabel: locale.value === 'tr' ? 'E-posta' : 'Email',
+  labels: {
+    details: locale.value === 'tr' ? 'Detayları gör' : 'View details',
+    close: locale.value === 'tr' ? 'Kapat' : 'Close',
+    themeColor: locale.value === 'tr' ? 'Tema rengi' : 'Theme color',
+    rgbMode: locale.value === 'tr' ? 'RGB modu — renkler otomatik değişsin' : 'RGB mode — auto-cycle colors',
+    rgbHint: locale.value === 'tr' ? 'Son kare: otomatik döngü' : 'Last swatch: auto-cycle',
+    custom: locale.value === 'tr' ? 'Özel' : 'Custom',
+    email: locale.value === 'tr' ? 'E-posta' : 'Email',
+    contactLead:
+      locale.value === 'tr'
+        ? 'Bir fikir, iş birliği ya da sadece merhaba demek için ulaşabilirsiniz.'
+        : 'Reach out for an idea, a collaboration, or just to say hello.',
+  },
+  readout: {
+    file: 'yilmaz.profile',
+    rows:
+      locale.value === 'tr'
+        ? [
+            { k: 'DURUM', v: 'Açık — staj & proje', dot: true },
+            { k: 'ODAK', v: 'Backend · Yapay Zeka · Full-stack' },
+            { k: 'ŞİRKET', v: 'Seneka Yazılım — stajyer' },
+            { k: 'KONUM', v: 'Türkiye' },
+            { k: 'YIĞIN', v: 'Java · C# · Spring · .NET · Vue' },
+          ]
+        : [
+            { k: 'STATUS', v: 'Open — internship & projects', dot: true },
+            { k: 'FOCUS', v: 'Backend · AI · Full-stack' },
+            { k: 'COMPANY', v: 'Seneka Yazılım — intern' },
+            { k: 'LOCATION', v: 'Türkiye' },
+            { k: 'STACK', v: 'Java · C# · Spring · .NET · Vue' },
+          ],
+  },
+  footStatement:
+    locale.value === 'tr' ? 'Kod yazarak öğrenir, öğrenerek üretirim.' : 'I learn by building, and build by learning.',
 }))
+
+const aboutFacts = computed(() =>
+  locale.value === 'tr'
+    ? [
+        { k: 'ÜNİVERSİTE', v: 'Selçuk Üniversitesi' },
+        { k: 'BÖLÜM', v: 'Bilgisayar Mühendisliği' },
+        { k: 'SINIF', v: '4. sınıf' },
+        { k: 'ODAK', v: 'AI · Makine Öğrenmesi · Web' },
+      ]
+    : [
+        { k: 'UNIVERSITY', v: 'Selçuk University' },
+        { k: 'DEPARTMENT', v: 'Computer Engineering' },
+        { k: 'YEAR', v: '4th year' },
+        { k: 'FOCUS', v: 'AI · Machine Learning · Web' },
+      ],
+)
 
 const projectsTr = [
   {
@@ -205,7 +286,7 @@ const projectsTr = [
   },
   {
     category: 'Web Uygulaması',
-    title: 'İzinlerim - Geliştirme devam etmekte',
+    title: 'İzinlerim — geliştirme devam ediyor',
     language: 'C#',
     description:
       'Çalışanların yıllık izin talep formlarını yöneticilerine göndererek talepte bulunduğu, birim yöneticilerinin talepleri imzalayarak onayladığı veya reddettiği ve kalan izin günlerini yönettiği tam kapsamlı bir web uygulaması geliştirdim. Sistemde rol tabanlı erişim (Birim yöneticisi, Çalışan), birim ve davet kodu ile üyelik, izin talebi oluşturma ve onay akışı, personel listesinde kalan izin günü güncelleme ve arama/filtreleme özellikleri bulunmaktadır. Sisteme yalnızca kullanıcı hesabı ile kayıt olunur; talep dahilinde sistem yöneticisi rol ataması gerçekleştirir. Backend tarafında ASP.NET Core Web API, Entity Framework Core ve PostgreSQL kullandım. E-imza atılabilmesi için Seneka PrimeAPI entegrasyonunu kendim gerçekleştirdim. Kimlik doğrulama JWT Bearer ile sağlanmaktadır. Frontend tarafında Nuxt (Vue 3) ile SPA yapısında, Tailwind CSS ile responsive bir arayüz tasarladım. RESTful API tasarımı ve Swagger ile dokümantasyon uygulandı.',
@@ -259,7 +340,7 @@ const projectsEn = [
   },
   {
     category: 'Web Application',
-    title: 'İzinlerim - Development in progress',
+    title: 'İzinlerim — development in progress',
     language: 'C#',
     description:
       'I developed a full-featured web application where employees create annual leave requests, unit managers approve or reject requests, and manage remaining leave days. The system includes role-based access (Unit manager, Employee), membership by unit and invite code, leave request creation and approval workflow, updating remaining leave days in the personnel list, and search/filter features. Registration is by user account only; the system admin assigns roles on request. On the backend I used ASP.NET Core Web API, Entity Framework Core and PostgreSQL; authentication is handled with JWT Bearer. On the frontend I built an SPA with Nuxt (Vue 3) and a responsive UI with Tailwind CSS. RESTful API design and Swagger documentation are in place.',
@@ -268,125 +349,52 @@ const projectsEn = [
 ]
 
 const experiencesTr = [
-  {
-    company: 'Seneka Yazılım',
-    role: 'Uzun dönem stajyer',
-    duration: 'Devam ediyor',
-    description: 'Ürün geliştirme, ürün iyileştirme, entegrasyon.',
-  },
-  {
-    company: 'Acun Medya Akademi',
-    role: 'Gönüllü Staj',
-    duration: '5 ay',
-    description: 'Java, Spring ve API entegrasyonu üzerine yoğun proje geliştirme.',
-  },
-  {
-    company: 'Motto Elektrik AŞ',
-    role: 'Stajyer',
-    duration: '1 ay',
-    description: 'Donanımsal süreçlerin yanı sıra web sayfası frontend güncellemeleri ve ürün yönetimi.',
-  },
+  { company: 'Seneka Yazılım', role: 'Uzun dönem stajyer', duration: 'Devam ediyor', description: 'Ürün geliştirme, ürün iyileştirme, entegrasyon.' },
+  { company: 'Acun Medya Akademi', role: 'Gönüllü staj', duration: '5 ay', description: 'Java, Spring ve API entegrasyonu üzerine yoğun proje geliştirme.' },
+  { company: 'Motto Elektrik AŞ', role: 'Stajyer', duration: '1 ay', description: 'Donanımsal süreçlerin yanı sıra web sayfası frontend güncellemeleri ve ürün yönetimi.' },
+]
+const experiencesEn = [
+  { company: 'Seneka Yazılım', role: 'Long-term intern', duration: 'Ongoing', description: 'Product development, product improvement, integration.' },
+  { company: 'Acun Medya Akademi', role: 'Voluntary internship', duration: '5 months', description: 'Intensive project development on Java, Spring and API integration.' },
+  { company: 'Motto Elektrik AŞ', role: 'Intern', duration: '1 month', description: 'Web frontend updates and product management alongside hardware processes.' },
 ]
 
-const experiencesEn = [
-  {
-    company: 'Seneka Yazılım',
-    role: 'Long-term intern',
-    duration: 'Ongoing',
-    description: 'Product development, product improvement, integration.',
-  },
-  {
-    company: 'Acun Medya Akademi',
-    role: 'Voluntary internship',
-    duration: '5 months',
-    description: 'Intensive project development on Java, Spring and API integration.',
-  },
-  {
-    company: 'Motto Elektrik AŞ',
-    role: 'Intern',
-    duration: '1 month',
-    description: 'Web frontend updates and product management alongside hardware processes.',
-  },
+const educationsTr = [
+  { school: 'Düzce Üniversitesi — Bilgisayar Mühendisliği', duration: 'Eylül 2022 - Ocak 2023' },
+  { school: 'Selçuk Üniversitesi — Bilgisayar Mühendisliği', duration: 'Ocak 2023 - Devam ediyor' },
+  { school: 'Acun Medya Akademi — FullStack Developer', duration: 'Şubat 2025 - Ağustos 2025' },
+  { school: 'Mesut Ilıca — Sıfırdan FullStack C#.NET', duration: 'Udemy, 59 saatlik program' },
+  { school: 'American Kültür Dil Okulu — İngilizce', duration: 'Temmuz 2024 - Şubat 2025' },
+]
+const educationsEn = [
+  { school: 'Düzce University — Computer Engineering', duration: 'September 2022 - January 2023' },
+  { school: 'Selçuk University — Computer Engineering', duration: 'January 2023 - Ongoing' },
+  { school: 'Acun Medya Academy — FullStack Developer', duration: 'February 2025 - August 2025' },
+  { school: 'FullStack C#.NET from Scratch', duration: 'Udemy, 59-hour program' },
+  { school: 'American Kültür Language School — English', duration: 'July 2024 - February 2025' },
 ]
 
 const projects = computed(() => (locale.value === 'tr' ? projectsTr : projectsEn))
 const experiences = computed(() => (locale.value === 'tr' ? experiencesTr : experiencesEn))
-const educationsTr = [
-  {
-    school: 'Düzce Üniversitesi Bilgisayar Mühendisliği',
-    duration: 'Eylül 2022 - Ocak 2023',
-  },
-  {
-    school: 'Selçuk Üniversitesi Bilgisayar Mühendisliği',
-    duration: 'Ocak 2023 - Devam etmekte',
-  },
-  {
-    school: 'Acun Medya Akademi FullStack Developer Eğitimi',
-    duration: 'Şubat 2025 - Ağustos 2025',
-  },
-  {
-    school: 'Mesut Ilıca, Sıfırdan FullStack C#.NET Eğitimi',
-    duration: 'Udemy platformunda 59 saatlik eğitim programı',
-  },
-  {
-    school: 'American Kültür Dil Okulu (İngilizce)',
-    duration: 'Temmuz 2024 - Şubat 2025',
-  },
-]
-const educationsEn = [
-  {
-    school: 'Duzce University Computer Engineering',
-    duration: 'September 2022 - January 2023',
-  },
-  {
-    school: 'Selcuk University Computer Engineering',
-    duration: 'January 2023 - Ongoing',
-  },
-  {
-    school: 'Acun Medya Academy FullStack Developer Training',
-    duration: 'February 2025 - August 2025',
-  },
-  {
-    school: 'FullStack C#.NET from Scratch Training',
-    duration: '59-hour training program',
-  },
-  {
-    school: 'American Kultur Language School (English)',
-    duration: 'July 2024 - February 2025',
-  },
-]
 const educations = computed(() => (locale.value === 'tr' ? educationsTr : educationsEn))
+
 const selectedProjectIndex = ref(null)
 const selectedProject = computed(() => {
   if (selectedProjectIndex.value === null) return null
   return projects.value[selectedProjectIndex.value] ?? null
 })
-
 function openProjectDetails(index) {
   selectedProjectIndex.value = index
 }
-
 function closeProjectDetails() {
   selectedProjectIndex.value = null
 }
 
 const skillCategories = [
-  {
-    name: 'Backend',
-    items: ['Java', 'C#', 'Spring', 'Spring Boot', 'Spring Security', 'ASP.NET Core', 'SQL', 'PostgreSQL', 'Python', 'FastAPI'],
-  },
-  {
-    name: 'Frontend',
-    items: ['HTML', 'CSS', 'JavaScript', 'React', 'Vue 3', 'Nuxt', 'Thymeleaf', 'Tailwind CSS', 'TypeScript', 'jQuery', 'Bootstrap'],
-  },
-  {
-    name: 'API & AI',
-    items: ['Swagger', 'SpringDoc OpenAPI', 'Google Gemini API', 'Groq API', 'Llama', 'Sentence Transformers'],
-  },
-  {
-    name: 'Tools',
-    items: ['IntelliJ IDEA', 'Remotion', 'Redmine', 'Adobe Illustrator', 'After Effects'],
-  },
+  { name: 'Backend', items: ['Java', 'C#', 'Spring', 'Spring Boot', 'Spring Security', 'ASP.NET Core', 'SQL', 'PostgreSQL', 'Python', 'FastAPI'] },
+  { name: 'Frontend', items: ['HTML', 'CSS', 'JavaScript', 'React', 'Vue 3', 'Nuxt', 'Thymeleaf', 'Tailwind CSS', 'TypeScript', 'jQuery', 'Bootstrap'] },
+  { name: 'API & AI', items: ['Swagger', 'SpringDoc OpenAPI', 'Google Gemini API', 'Groq API', 'Llama', 'Sentence Transformers'] },
+  { name: 'Tools', items: ['IntelliJ IDEA', 'Remotion', 'Redmine', 'Adobe Illustrator', 'After Effects'] },
 ]
 
 const contactLinks = [
@@ -394,19 +402,17 @@ const contactLinks = [
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/y%C4%B1lmaz-sayar?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app', icon: 'LinkedIn' },
 ]
 
-/** E-posta adresi – dile göre değişmez */
 const EMAIL_ADDRESS = 'sayaryilmaz2004@gmail.com'
-
-const marqueeSkills = skillCategories.flatMap((cat) => cat.items)
 
 const cvPdfUrl = '/YILMAZSAYAR-CV.pdf'
 const cvDownloadFilename = 'Yilmaz-Sayar-CV.pdf'
 
 async function downloadCv(e) {
   e.preventDefault()
-  const msgMissing = locale.value === 'tr'
-    ? 'CV dosyası bulunamadı. Lütfen projenin public klasörüne YILMAZSAYAR-CV.pdf adında gerçek bir PDF ekleyin (şu an orada yok veya sunucu PDF yerine başka bir sayfa dönüyor).'
-    : 'CV file not found. Please add a real PDF named YILMAZSAYAR-CV.pdf to the project\'s public folder (it is missing or the server is returning a different page).'
+  const msgMissing =
+    locale.value === 'tr'
+      ? 'CV dosyası bulunamadı. Lütfen projenin public klasörüne YILMAZSAYAR-CV.pdf adında gerçek bir PDF ekleyin.'
+      : 'CV file not found. Please add a real PDF named YILMAZSAYAR-CV.pdf to the project\'s public folder.'
   try {
     const res = await fetch(cvPdfUrl)
     if (!res.ok) throw new Error('not found')
@@ -428,479 +434,371 @@ async function downloadCv(e) {
   }
 }
 
-const aboutTextTr = `Selçuk Üniversitesi Bilgisayar Mühendisliği 4. sınıf öğrencisiyim. Yazılım projelerimi makine öğrenmesi ve yapay zeka ile birleştirmeye odaklanan bir mühendis adayıyım. Full stack geliştirme, API tasarımı ve modern web teknolojileri ile ilgileniyorum. Şu anda iş yeri eğitim stajımı yapmaktayım ve Seneka Yazılım bünyesinde Ürün geliştirmeleri, ürün iyileştirmeleri, entegrasyon gibi alanlarda çalışmalar yapıyorum. Kullanıcı taleplerine göre çözüm buluyor, ürün güncelleştirmelerinde görev alıyorum.`
-
+const aboutTextTr = `Selçuk Üniversitesi Bilgisayar Mühendisliği 4. sınıf öğrencisiyim. Yazılım projelerimi makine öğrenmesi ve yapay zeka ile birleştirmeye odaklanan bir mühendis adayıyım. Full stack geliştirme, API tasarımı ve modern web teknolojileri ile ilgileniyorum. Şu anda iş yeri eğitim stajımı yapmaktayım ve Seneka Yazılım bünyesinde ürün geliştirmeleri, ürün iyileştirmeleri ve entegrasyon gibi alanlarda çalışmalar yapıyorum. Kullanıcı taleplerine göre çözüm üretiyor, ürün güncellemelerinde görev alıyorum.`
 const aboutTextEn = `I am a 4th year Computer Engineering student at Selçuk University. I am an aspiring engineer focused on combining software projects with machine learning and artificial intelligence. I am interested in full stack development, API design and modern web technologies. I am currently doing my workplace training internship at Seneka Yazılım, working on product development, product improvement and integration. I find solutions based on user needs and take part in product updates.`
-
 const aboutText = computed(() => (locale.value === 'tr' ? aboutTextTr : aboutTextEn))
+
+const currentYear = new Date().getFullYear()
 </script>
 
 <template>
-  <div class="relative isolate min-h-screen bg-[#030306] text-zinc-100 antialiased">
-    <StarfieldBackground />
-    <div
-      class="pointer-events-none fixed inset-0 z-[1] accent-gradient-bg opacity-[0.82]"
-      aria-hidden="true"
-    />
-    <div class="relative z-10">
-      <HangingStickFigure
-        :open-theme-label="locale === 'tr' ? 'Tema rengi ayarlarını aç' : 'Open theme color settings'"
-        @open-theme="toggleThemePicker"
-      />
-      <!-- Üst navigasyon -->
-    <nav class="sticky top-0 z-40 border-b border-zinc-800/80 bg-black/90 backdrop-blur-sm">
-      <div class="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-4 px-6 py-4">
-        <div class="flex flex-wrap items-center gap-4">
-          <a
-            href="#"
-            class="rounded-lg px-4 py-2 text-sm font-medium accent-bg-muted accent-text"
-          >
-            {{ t.nav.home }}
+  <div>
+    <!-- Navigation -->
+    <nav class="nav">
+      <div class="wrap">
+        <div class="nav__inner">
+          <a href="#top" class="nav__brand" @click="closeMenu">
+            <span class="nav__mark">YS</span>
+            Yılmaz Sayar
           </a>
-          <a href="#hakkinda" class="text-sm font-medium text-zinc-300 hover:text-white">
-            {{ t.nav.about }}
-          </a>
-          <a href="#egitim" class="text-sm font-medium text-zinc-300 hover:text-white">
-            {{ t.nav.education }}
-          </a>
-          <a href="#projeler" class="text-sm font-medium text-zinc-300 hover:text-white">
-            {{ t.nav.projects }}
-          </a>
-          <a href="#deneyim" class="text-sm font-medium text-zinc-300 hover:text-white">
-            {{ t.nav.experience }}
-          </a>
-          <a href="#iletisim" class="text-sm font-medium text-zinc-300 hover:text-white">
-            {{ t.nav.contact }}
-          </a>
-        </div>
-        <div class="flex items-center gap-3">
-          <a
-            href="#"
-            class="rounded-lg px-4 py-2 text-sm font-medium accent-bg text-zinc-900 transition-opacity hover:opacity-90"
-            @click.prevent="downloadCv"
-          >
-            {{ t.nav.downloadCv }}
-          </a>
-          <div class="flex rounded-lg border border-zinc-700 p-0.5">
+
+          <div class="nav__rail">
+            <a href="#hakkinda" class="nav__link">{{ t.nav.about }}</a>
+            <a href="#yetenekler" class="nav__link">{{ t.nav.skills }}</a>
+            <a href="#deneyim" class="nav__link">{{ t.nav.experience }}</a>
+            <a href="#egitim" class="nav__link">{{ t.nav.education }}</a>
+            <a href="#projeler" class="nav__link">{{ t.nav.projects }}</a>
+            <a href="#iletisim" class="nav__link">{{ t.nav.contact }}</a>
+          </div>
+
+          <div class="nav__right">
+            <a href="#" class="btn btn--primary nav__cv" @click.prevent="downloadCv">
+              {{ t.nav.downloadCv }}
+            </a>
+            <div class="lang" role="group" aria-label="Language">
+              <button type="button" class="lang__btn" :class="{ 'lang__btn--on': locale === 'tr' }" @click="setLocale('tr')">TR</button>
+              <button type="button" class="lang__btn" :class="{ 'lang__btn--on': locale === 'en' }" @click="setLocale('en')">EN</button>
+            </div>
+
+            <div ref="colorPickerContainer" class="relative">
+              <button
+                type="button"
+                class="accent-dot"
+                :aria-label="t.labels.themeColor"
+                :aria-expanded="showColorPicker"
+                @click.stop="toggleThemePicker"
+              >
+                <span aria-hidden="true" />
+              </button>
+              <Transition name="picker">
+                <div v-show="showColorPicker" class="picker absolute right-0 z-50 mt-2 w-max">
+                  <p class="mono-label mb-3">{{ t.labels.themeColor }}</p>
+                  <div class="picker__grid">
+                    <button
+                      v-for="color in presetColors"
+                      :key="color"
+                      type="button"
+                      class="swatch"
+                      :class="{ 'swatch--on': !colorCycleActive && accentColor.toLowerCase() === color.toLowerCase() }"
+                      :style="{ backgroundColor: color }"
+                      :aria-label="color"
+                      @click="chooseColor(color)"
+                    />
+                    <button
+                      type="button"
+                      class="swatch swatch--cycle"
+                      :class="{ 'swatch--on': colorCycleActive }"
+                      :aria-label="t.labels.rgbMode"
+                      :aria-pressed="colorCycleActive"
+                      @click.stop="toggleColorCycle"
+                    />
+                  </div>
+                  <p class="mono-label" style="margin-top: 0.6rem">{{ t.labels.rgbHint }}</p>
+                  <label class="mt-3 flex items-center gap-2">
+                    <span class="mono-label">{{ t.labels.custom }}</span>
+                    <input
+                      :value="accentColor"
+                      type="color"
+                      class="h-8 w-8 cursor-pointer rounded-md border-0 bg-transparent p-0"
+                      @input="stopColorCycle(); applyAccent($event.target.value)"
+                    />
+                  </label>
+                </div>
+              </Transition>
+            </div>
+
             <button
               type="button"
-              :class="locale === 'tr' ? 'rounded-md px-3 py-1.5 text-xs font-medium accent-bg-muted accent-text' : 'rounded-md px-3 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white'"
-              @click="setLocale('tr')"
+              class="nav__burger"
+              :aria-label="t.nav.menu"
+              :aria-expanded="mobileMenuOpen"
+              @click="mobileMenuOpen = !mobileMenuOpen"
             >
-              TR
-            </button>
-            <button
-              type="button"
-              :class="locale === 'en' ? 'rounded-md px-3 py-1.5 text-xs font-medium accent-bg-muted accent-text' : 'rounded-md px-3 py-1.5 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-white'"
-              @click="setLocale('en')"
-            >
-              EN
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <template v-if="!mobileMenuOpen">
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="3" y1="18" x2="21" y2="18" />
+                </template>
+                <template v-else>
+                  <line x1="5" y1="5" x2="19" y2="19" />
+                  <line x1="19" y1="5" x2="5" y2="19" />
+                </template>
+              </svg>
             </button>
           </div>
+        </div>
+
+        <div v-show="mobileMenuOpen" class="nav__sheet">
+          <a href="#hakkinda" @click="closeMenu">{{ t.nav.about }}</a>
+          <a href="#yetenekler" @click="closeMenu">{{ t.nav.skills }}</a>
+          <a href="#deneyim" @click="closeMenu">{{ t.nav.experience }}</a>
+          <a href="#egitim" @click="closeMenu">{{ t.nav.education }}</a>
+          <a href="#projeler" @click="closeMenu">{{ t.nav.projects }}</a>
+          <a href="#iletisim" @click="closeMenu">{{ t.nav.contact }}</a>
+          <a href="#" @click="closeMenu(); downloadCv($event)">{{ t.nav.downloadCv }}</a>
         </div>
       </div>
     </nav>
 
-    <div class="mx-auto max-w-4xl px-6 pb-16">
-      <!-- Ana sayfa Hero -->
-      <header class="py-20 text-center sm:py-28">
-        <h1 class="hero-title text-4xl font-bold tracking-tight text-white sm:text-5xl">
-          Yılmaz Sayar
-        </h1>
-        <p class="mt-3 text-xl font-medium accent-text sm:text-2xl">
-          {{ t.hero.title }}
-        </p>
-      </header>
-
-      <!-- Yetenekler şeridi (marquee) -->
-      <section class="relative -mx-6 overflow-hidden py-6 sm:-mx-6">
-        <div class="marquee-track flex w-max gap-4">
-          <div class="flex shrink-0 gap-4">
-            <span
-              v-for="(skill, i) in marqueeSkills"
-              :key="`a-${i}`"
-              class="marquee-pill shrink-0 rounded-full border-2 px-5 py-2.5 text-sm font-medium accent-skill-border accent-skill-bg accent-skill-text"
-            >
-              {{ skill }}
-            </span>
-          </div>
-          <div class="flex shrink-0 gap-4" aria-hidden="true">
-            <span
-              v-for="(skill, i) in marqueeSkills"
-              :key="`b-${i}`"
-              class="marquee-pill shrink-0 rounded-full border-2 px-5 py-2.5 text-sm font-medium accent-skill-border accent-skill-bg accent-skill-text"
-            >
-              {{ skill }}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Hakkımda -->
-      <section id="hakkinda" class="scroll-mt-20 py-10">
-        <h2 class="mb-6 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          {{ t.sections.about }}
-        </h2>
-        <p class="max-w-2xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-          {{ aboutText }}
-        </p>
-      </section>
-
-      <!-- Eğitim -->
-      <section id="egitim" class="scroll-mt-8 py-10">
-        <h2 class="mb-6 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          {{ t.sections.education }}
-        </h2>
-        <div class="grid gap-5 sm:grid-cols-2">
-          <article
-            v-for="(edu, i) in educations"
-            :key="i"
-            class="rounded-xl border border-zinc-800 bg-zinc-900/60 px-6 py-5 transition-all duration-300 hover-accent-border hover:bg-zinc-900/80 hover-accent-shadow"
-          >
-            <h3 class="text-base font-semibold text-white sm:text-lg">
-              {{ edu.school }}
-            </h3>
-            <p class="mt-2 text-sm font-medium accent-text">
-              {{ edu.duration }}
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <!-- Projeler -->
-      <section id="projeler" class="scroll-mt-8 py-10">
-        <h2 class="mb-6 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          {{ t.sections.projects }}
-        </h2>
-        <div class="grid gap-6 sm:grid-cols-2">
-          <article
-            v-for="(project, i) in projects"
-            :key="i"
-            class="cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900/80 p-6 transition-all duration-300 hover-accent-border hover:bg-zinc-900 hover-accent-shadow"
-            @click="openProjectDetails(i)"
-          >
-            <div class="mt-4">
-              <div class="flex items-start justify-between gap-3">
-                <h3 class="text-lg font-semibold text-white">
-                  {{ project.title }}
-                </h3>
-                <span
-                  v-if="project.language"
-                  class="inline-block rounded-md px-3 py-1.5 text-xs font-semibold ring-1"
-                  :style="{
-                    backgroundColor: 'rgba(var(--accent-rgb), 0.2)',
-                    color: 'var(--accent)',
-                    boxShadow: 'inset 0 0 0 1px rgba(var(--accent-rgb), 0.35)',
-                  }"
-                >
-                  {{ project.language }}
-                </span>
-              </div>
-              <div class="mt-2 flex items-center justify-start gap-3">
-                <span class="shrink-0 whitespace-nowrap text-xs font-medium accent-text">
-                  {{ locale === 'tr' ? 'Detayları göster' : 'Open details' }}
-                </span>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <Transition name="project-detail">
-        <div
-          v-if="selectedProject"
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-          @click.self="closeProjectDetails"
-        >
-          <article class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-zinc-700 bg-zinc-950 p-6 sm:p-8">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h3 class="mt-4 text-2xl font-bold text-white">
-                  {{ selectedProject.title }}
-                </h3>
-                <span
-                  v-if="selectedProject.language"
-                  class="mt-3 inline-block rounded-md px-3 py-1.5 text-xs font-semibold ring-1"
-                  :style="{
-                    backgroundColor: 'rgba(var(--accent-rgb), 0.2)',
-                    color: 'var(--accent)',
-                    boxShadow: 'inset 0 0 0 1px rgba(var(--accent-rgb), 0.35)',
-                  }"
-                >
-                  {{ selectedProject.language }}
-                </span>
-              </div>
-              <button
-                type="button"
-                class="rounded-lg border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white"
-                @click="closeProjectDetails"
-              >
-                {{ locale === 'tr' ? 'Kapat' : 'Close' }}
-              </button>
-            </div>
-
-            <div class="mt-5 flex flex-wrap gap-2">
-              <span
-                v-for="tag in selectedProject.tags"
-                :key="tag"
-                class="rounded-full bg-zinc-700/90 px-3 py-1 text-xs font-medium text-zinc-200"
-              >
-                {{ tag }}
+    <main id="top">
+      <!-- Hero -->
+      <section class="hero">
+        <div class="wrap">
+          <div class="hero__grid">
+            <div data-reveal class="reveal">
+              <span class="hero__status">
+                <span class="hero__pulse" aria-hidden="true" />
+                {{ t.hero.status }}
               </span>
+              <h1 class="hero__name">Yılmaz Sayar</h1>
+              <p class="hero__role">{{ t.hero.role }}</p>
+              <p class="hero__lead">{{ t.hero.lead }}</p>
+              <div class="hero__cta">
+                <a href="#" class="btn btn--primary" @click.prevent="downloadCv">{{ t.nav.downloadCv }}</a>
+                <a href="#iletisim" class="btn btn--line">{{ t.hero.contact }}</a>
+                <a href="https://github.com/YilmazSayar" target="_blank" rel="noopener noreferrer" class="btn btn--ghost">GitHub →</a>
+              </div>
             </div>
 
-            <p class="mt-5 text-sm leading-relaxed text-zinc-300 sm:text-base">
-              {{ selectedProject.description }}
-            </p>
-
-            <a
-              v-if="selectedProject.githubUrl"
-              :href="selectedProject.githubUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="mt-6 inline-block text-sm font-medium accent-text transition-colors hover-accent-text"
-            >
-              GitHub →
-            </a>
-          </article>
+            <div data-reveal class="reveal panel">
+              <div class="panel__bar">
+                <span class="panel__file mono">{{ t.readout.file }}</span>
+                <span class="panel__chip">READY</span>
+              </div>
+              <div class="panel__body">
+                <div v-for="row in t.readout.rows" :key="row.k" class="panel__row">
+                  <span class="panel__key">{{ row.k }}</span>
+                  <span class="panel__val">
+                    <span v-if="row.dot" class="dot" aria-hidden="true" />{{ row.v }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </Transition>
+      </section>
 
-      <!-- Deneyim -->
-      <section id="deneyim" class="scroll-mt-8 py-10">
-        <h2 class="mb-6 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          {{ t.sections.experience }}
-        </h2>
-        <ul class="space-y-6">
-          <li
-            v-for="(exp, i) in experiences"
-            :key="i"
-            class="rounded-xl border border-zinc-800 bg-zinc-900/60 px-6 py-5 transition-all duration-300 hover-accent-border hover:bg-zinc-900/80 hover-accent-shadow"
-          >
-            <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 class="text-lg font-semibold text-white">
-                {{ exp.company }}
+      <!-- About -->
+      <section id="hakkinda" class="section">
+        <div class="wrap" style="padding-block: var(--space-3xl)">
+          <div class="section__head" data-reveal>
+            <h2 class="section__title">{{ t.sections.about }}</h2>
+          </div>
+          <div class="grid gap-10 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:gap-14">
+            <p data-reveal class="reveal" style="max-width: 62ch; font-size: var(--text-md); line-height: 1.7; color: var(--color-ink-2)">
+              {{ aboutText }}
+            </p>
+            <div data-reveal class="reveal panel">
+              <div class="panel__bar">
+                <span class="panel__file mono">özet.md</span>
+              </div>
+              <div class="panel__body">
+                <div v-for="fact in aboutFacts" :key="fact.k" class="panel__row">
+                  <span class="panel__key">{{ fact.k }}</span>
+                  <span class="panel__val">{{ fact.v }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Skills -->
+      <section id="yetenekler" class="section">
+        <div class="wrap" style="padding-block: var(--space-3xl)">
+          <div class="section__head" data-reveal>
+            <h2 class="section__title">{{ t.sections.skills }}</h2>
+          </div>
+          <div class="spec">
+            <div v-for="cat in skillCategories" :key="cat.name" class="spec__row" data-reveal>
+              <div class="spec__cat">{{ cat.name }}</div>
+              <div class="spec__items">
+                <span v-for="skill in cat.items" :key="skill" class="chip">{{ skill }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Experience -->
+      <section id="deneyim" class="section">
+        <div class="wrap" style="padding-block: var(--space-3xl)">
+          <div class="section__head" data-reveal>
+            <h2 class="section__title">{{ t.sections.experience }}</h2>
+          </div>
+          <div class="tl">
+            <div v-for="(exp, i) in experiences" :key="i" class="tl__item" data-reveal>
+              <div class="tl__head">
+                <span class="tl__company">{{ exp.company }}</span>
+                <span class="tl__dur mono">{{ exp.duration }}</span>
+              </div>
+              <p class="tl__role">{{ exp.role }}</p>
+              <p class="tl__desc">{{ exp.description }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Education -->
+      <section id="egitim" class="section">
+        <div class="wrap" style="padding-block: var(--space-3xl)">
+          <div class="section__head" data-reveal>
+            <h2 class="section__title">{{ t.sections.education }}</h2>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <article v-for="(edu, i) in educations" :key="i" class="card p-5" data-reveal>
+              <h3 style="font-family: var(--font-display); font-weight: 600; font-size: var(--text-md); color: var(--color-ink); line-height: 1.3">
+                {{ edu.school }}
               </h3>
-              <span
-                v-if="exp.duration"
-                class="text-sm font-medium accent-text"
-              >
-                {{ exp.duration }}
-              </span>
-            </div>
-            <p class="mt-1 text-sm font-medium accent-text">
-              {{ exp.role }}
-            </p>
-            <p class="mt-3 text-sm leading-relaxed text-zinc-400">
-              {{ exp.description }}
-            </p>
-          </li>
-        </ul>
-      </section>
-
-      <!-- Yetenekler -->
-      <section class="scroll-mt-8 py-10">
-        <h2 class="mb-6 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          {{ t.sections.skills }}
-        </h2>
-        <div class="space-y-6">
-          <div
-            v-for="cat in skillCategories"
-            :key="cat.name"
-            class="rounded-xl border border-zinc-800 bg-zinc-900/60 px-6 py-5"
-          >
-            <h3 class="text-sm font-semibold uppercase tracking-wider accent-text">
-              {{ cat.name }}
-            </h3>
-            <div class="mt-3 flex flex-wrap gap-2">
-              <span
-                v-for="skill in cat.items"
-                :key="skill"
-                class="rounded-full accent-skill-border accent-skill-bg accent-skill-text px-4 py-1.5 text-sm font-medium"
-              >
-                {{ skill }}
-              </span>
-            </div>
+              <p class="mono" style="margin-top: 0.6rem; font-size: var(--text-xs); color: var(--color-accent); letter-spacing: 0.02em">
+                {{ edu.duration }}
+              </p>
+            </article>
           </div>
         </div>
       </section>
 
-      <!-- İletişim -->
-      <section id="iletisim" class="scroll-mt-8 py-10">
-        <h2 class="mb-6 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-          {{ t.sections.contact }}
-        </h2>
-        <div class="flex flex-col items-center gap-4">
-          <div class="flex flex-wrap items-center justify-center gap-4">
-            <a
-              v-for="link in contactLinks"
-              :key="link.icon"
-              :href="link.href"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/80 px-5 py-3 text-sm font-medium accent-text transition-all duration-300 hover-accent-border hover:bg-zinc-900 hover-accent-shadow hover-accent-text"
+      <!-- Projects -->
+      <section id="projeler" class="section">
+        <div class="wrap" style="padding-block: var(--space-3xl)">
+          <div class="section__head" data-reveal>
+            <h2 class="section__title">{{ t.sections.projects }}</h2>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <article
+              v-for="(project, i) in projects"
+              :key="i"
+              class="card card--interactive p-6"
+              data-reveal
+              role="button"
+              tabindex="0"
+              @click="openProjectDetails(i)"
+              @keydown.enter="openProjectDetails(i)"
+              @keydown.space.prevent="openProjectDetails(i)"
             >
-              <!-- GitHub -->
-              <svg v-if="link.icon === 'GitHub'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="shrink-0" aria-hidden="true">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              <!-- LinkedIn -->
-              <svg v-else-if="link.icon === 'LinkedIn'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="shrink-0" aria-hidden="true">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-              <span>{{ link.label }}</span>
-            </a>
+              <div class="flex items-start justify-between gap-3">
+                <span class="mono-label">{{ project.category }}</span>
+                <span v-if="project.language" class="chip chip--lang">{{ project.language }}</span>
+              </div>
+              <h3 style="margin-top: 0.9rem; font-family: var(--font-display); font-weight: 600; font-size: var(--text-lg); color: var(--color-ink); line-height: 1.25">
+                {{ project.title }}
+              </h3>
+              <span class="mono" style="margin-top: 1.1rem; display: inline-block; font-size: var(--text-xs); color: var(--color-accent)">
+                {{ t.labels.details }} →
+              </span>
+            </article>
           </div>
-          <p class="text-sm text-zinc-400 transition-colors duration-200 hover-accent-text">
-            {{ t.contactEmailLabel }}:
-            <a :href="`mailto:${EMAIL_ADDRESS}`" class="accent-text">{{ EMAIL_ADDRESS }}</a>
-          </p>
         </div>
       </section>
 
-      <footer class="border-t border-zinc-800/60 pt-8 text-center text-sm text-zinc-500">
-        © {{ new Date().getFullYear() }} Yılmaz Sayar
-      </footer>
-    </div>
-
-    <!-- Tema rengi seçici -->
-    <div ref="colorPickerContainer" class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-      <Transition name="picker">
-        <div
-          v-show="showColorPicker"
-          class="rounded-2xl border border-zinc-700 bg-zinc-900/95 p-4 shadow-xl backdrop-blur-sm"
-        >
-          <p class="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-400">
-            {{ t.themeColor }}
-          </p>
-          <div class="grid grid-cols-5 gap-2">
-            <button
-              v-for="color in presetColors"
-              :key="color"
-              type="button"
-              :style="{ backgroundColor: color }"
-              :class="[
-                'h-9 w-9 rounded-full border-2 transition-transform hover:scale-110',
-                accentColor === color ? 'border-white ring-2 ring-white/50' : 'border-transparent',
-              ]"
-              :aria-label="`Renk: ${color}`"
-              @click="chooseColor(color)"
-            />
-            <button
-              type="button"
-              class="color-cycle-dot h-9 w-9 rounded-full border-2 transition-transform hover:scale-110"
-              :class="colorCycleActive ? 'border-white ring-2 ring-white/50' : 'border-transparent'"
-              aria-label="Renkler otomatik değişsin"
-              @click.stop="toggleColorCycle"
-            />
+      <!-- Contact -->
+      <section id="iletisim" class="section">
+        <div class="wrap" style="padding-block: var(--space-3xl)">
+          <div class="section__head" data-reveal>
+            <h2 class="section__title">{{ t.sections.contact }}</h2>
           </div>
-          <label class="mt-3 flex items-center gap-2">
-            <span class="text-xs text-zinc-400">{{ t.custom }}</span>
-            <input
-              v-model="accentColor"
-              type="color"
-              class="h-9 w-9 cursor-pointer rounded-full border-0 bg-transparent p-0"
-              @input="stopColorCycle(); applyAccent(accentColor)"
-            />
-          </label>
+          <div data-reveal class="reveal">
+            <p style="max-width: 48ch; font-size: var(--text-md); color: var(--color-ink-2); margin-bottom: var(--space-lg)">
+              {{ t.labels.contactLead }}
+            </p>
+            <div class="flex flex-wrap items-center gap-3">
+              <a
+                v-for="link in contactLinks"
+                :key="link.icon"
+                :href="link.href"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="contact-link"
+              >
+                <svg v-if="link.icon === 'GitHub'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+                <svg v-else-if="link.icon === 'LinkedIn'" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+                <span>{{ link.label }}</span>
+              </a>
+              <a :href="`mailto:${EMAIL_ADDRESS}`" class="contact-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="m3 7 9 6 9-6" />
+                </svg>
+                <span>{{ EMAIL_ADDRESS }}</span>
+              </a>
+            </div>
+          </div>
         </div>
-      </Transition>
-    </div>
-    <!-- Mobil: çöp adam yok; tema için küçük palet kısayolu -->
-    <button
-      type="button"
-      class="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-xl border border-zinc-600 bg-zinc-900/95 shadow-lg backdrop-blur-sm transition hover:border-zinc-500 hover:shadow-xl sm:hidden"
-      :aria-label="locale === 'tr' ? 'Tema rengi' : 'Theme color'"
-      @click.stop="toggleThemePicker"
-    >
-      <span class="grid grid-cols-3 gap-0.5 p-1" aria-hidden="true">
-        <span class="h-2 w-2 rounded-full bg-red-500" />
-        <span class="h-2 w-2 rounded-full bg-sky-500" />
-        <span class="h-2 w-2 rounded-full bg-amber-400" />
-        <span class="h-2 w-2 rounded-full bg-emerald-500" />
-        <span class="h-2 w-2 rounded-full bg-violet-500" />
-        <span class="h-2 w-2 rounded-full bg-zinc-500" />
-      </span>
-    </button>
-    </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="foot">
+      <div class="wrap">
+        <p class="foot__statement">{{ t.footStatement }}</p>
+        <div class="foot__bar">
+          <span class="foot__meta">© {{ currentYear }} Yılmaz Sayar</span>
+          <span class="foot__meta">{{ t.hero.role }} · Türkiye</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Project detail modal -->
+    <Transition name="modal">
+      <div
+        v-if="selectedProject"
+        class="fixed inset-0 z-[400] flex items-center justify-center p-4"
+        style="background: oklch(8% 0.01 258 / 0.72); backdrop-filter: blur(6px)"
+        @click.self="closeProjectDetails"
+      >
+        <article
+          class="card w-full max-w-3xl overflow-y-auto p-6 sm:p-8"
+          style="max-height: 88vh; background: var(--color-paper-2)"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <span class="mono-label">{{ selectedProject.category }}</span>
+              <h3 style="margin-top: 0.6rem; font-family: var(--font-display); font-weight: 600; font-size: var(--text-2xl); color: var(--color-ink); line-height: 1.15">
+                {{ selectedProject.title }}
+              </h3>
+            </div>
+            <button type="button" class="btn btn--line" @click="closeProjectDetails">{{ t.labels.close }}</button>
+          </div>
+
+          <span v-if="selectedProject.language" class="chip chip--lang" style="margin-top: 1rem">{{ selectedProject.language }}</span>
+
+          <p style="margin-top: 1.25rem; font-size: var(--text-sm); line-height: 1.7; color: var(--color-ink-2)">
+            {{ selectedProject.description }}
+          </p>
+
+          <div class="mt-5 flex flex-wrap gap-2">
+            <span v-for="tag in selectedProject.tags" :key="tag" class="chip">{{ tag }}</span>
+          </div>
+
+          <a
+            v-if="selectedProject.githubUrl"
+            :href="selectedProject.githubUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn--line"
+            style="margin-top: 1.5rem"
+          >
+            GitHub →
+          </a>
+        </article>
+      </div>
+    </Transition>
   </div>
 </template>
-
-<style scoped>
-.hero-title {
-  background: linear-gradient(
-    90deg,
-    #ffffff 0%,
-    #f5f5f5 20%,
-    #ffffff 40%,
-    #e5e5e5 55%,
-    #ffffff 70%,
-    #f0f0f0 85%,
-    #ffffff 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.4))
-    drop-shadow(0 2px 0 rgba(0, 0, 0, 0.3))
-    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
-  animation: hero-glow 4s ease-in-out infinite;
-}
-@keyframes hero-glow {
-  50% {
-    filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.4))
-      drop-shadow(0 2px 0 rgba(0, 0, 0, 0.3))
-      drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35))
-      drop-shadow(0 0 24px rgba(var(--accent-rgb), 0.4))
-      drop-shadow(0 0 48px rgba(var(--accent-rgb), 0.25));
-  }
-}
-
-.color-cycle-dot {
-  background: linear-gradient(
-    135deg,
-    #ef4444 0%,
-    #f97316 15%,
-    #eab308 30%,
-    #22c55e 45%,
-    #0ea5e9 60%,
-    #8b5cf6 75%,
-    #ec4899 90%,
-    #ef4444 100%
-  );
-}
-
-.picker-enter-active,
-.picker-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.picker-enter-from,
-.picker-leave-to {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-.project-detail-enter-active,
-.project-detail-leave-active {
-  transition: opacity 0.22s ease;
-}
-.project-detail-enter-from,
-.project-detail-leave-to {
-  opacity: 0;
-}
-
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-.marquee-track {
-  animation: marquee 35s linear infinite;
-}
-.marquee-track:hover {
-  animation-play-state: paused;
-}
-</style>

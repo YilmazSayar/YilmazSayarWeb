@@ -1,0 +1,62 @@
+/* Hallmark tokens — theme: Graphite (dark) · genre: atmospheric / engineering-panel
+ * The fixed palette is OKLCH; the single --accent is switchable at runtime.
+ * Portable design system for Yılmaz Sayar's portfolio.
+ */
+:root {
+  /* Surfaces / ink — cool graphite, anchor hue 258 */
+  --color-paper:   oklch(14.5% 0.012 258);
+  --color-paper-2: oklch(17.5% 0.013 258);
+  --color-paper-3: oklch(21.5% 0.014 258);
+  --color-ink:     oklch(96% 0.006 250);
+  --color-ink-2:   oklch(80% 0.010 252);
+  --color-muted:   oklch(64% 0.012 254);
+  --color-faint:   oklch(52% 0.012 256);
+  --color-rule:    oklch(27% 0.012 258);
+  --color-rule-2:  oklch(36% 0.014 258);
+
+  /* Accent — single signal, runtime-switchable (default amber 245 158 11) */
+  --accent: #f59e0b;
+  --accent-rgb: 245, 158, 11;
+  --color-accent: var(--accent);
+  --color-accent-ink: oklch(15% 0.012 258);
+  --color-focus: var(--accent);
+
+  /* Type */
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: 2.875rem;
+  --text-display: clamp(2.6rem, 5vw + 1rem, 4.5rem);
+
+  /* Spacing — 4pt scale */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 9rem;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-short: 200ms;
+  --dur-mid: 320ms;
+}

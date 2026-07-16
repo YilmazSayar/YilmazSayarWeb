@@ -1,0 +1,12 @@
+{
+  "date": "2026-07-16",
+  "framework": "Vue 3 + Vite (SPA)",
+  "styling": "Tailwind CSS v4 (@import tailwindcss)",
+  "fonts_before": "DM Sans / Syne (referenced but never loaded)",
+  "fonts_after": "Space Grotesk + Geist + JetBrains Mono (Google Fonts)",
+  "palette_before": "dark #030306, hex/rgb switchable accent",
+  "palette_after": "OKLCH graphite dark, single runtime-switchable accent",
+  "motion": "no motion library; custom CSS + IntersectionObserver",
+  "preserved": ["TR/EN i18n", "CV download", "project modal", "accent picker", "content/IA"],
+  "removed": ["StarfieldBackground", "HangingStickFigure", "rainbow accent auto-cycle", "gradient headline"]
+}
