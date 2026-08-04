@@ -172,7 +172,7 @@ const t = computed(() => ({
     menu: locale.value === 'tr' ? 'Menü' : 'Menu',
   },
   hero: {
-    status: locale.value === 'tr' ? 'Junior Software Developer - Technical Presales' : 'Junior Software Developer - Technical Presales',
+    status: locale.value === 'tr' ? 'Junior Yazılım Geliştirici - Yazılım Destek Uzmanı' : 'Junior Software Developer - Software Support Specialist',
     role: locale.value === 'tr' ? 'Bilgisayar Mühendisi' : 'Computer Engineer',
     lead:
       locale.value === 'tr'
@@ -187,6 +187,7 @@ const t = computed(() => ({
     experience: locale.value === 'tr' ? 'Deneyim' : 'Experience',
     skills: locale.value === 'tr' ? 'Yetenekler' : 'Skills',
     contact: locale.value === 'tr' ? 'İletişim' : 'Contact',
+    team: locale.value === 'tr' ? 'Tek başıma değilim, 5 kişilik büyük bir ekibiz...' : 'I am not alone — we are a team of five...',
   },
   labels: {
     details: locale.value === 'tr' ? 'Detayları gör' : 'View details',
@@ -201,21 +202,46 @@ const t = computed(() => ({
         ? 'Bir fikir, iş birliği ya da sadece merhaba demek için ulaşabilirsiniz.'
         : 'Reach out for an idea, a collaboration, or just to say hello.',
   },
+  form: {
+    name: locale.value === 'tr' ? 'İsim Soyisim' : 'Full Name',
+    namePlaceholder: locale.value === 'tr' ? 'İsim Soyisim' : 'Full Name',
+    mail: 'Mail',
+    mailPlaceholder: 'ornek@gmail.com',
+    subject: locale.value === 'tr' ? 'Konu' : 'Subject',
+    subjectPlaceholder: locale.value === 'tr' ? 'Proje Hakkında' : 'About the project',
+    message: locale.value === 'tr' ? 'Mesajınız' : 'Your Message',
+    messagePlaceholder:
+      locale.value === 'tr' ? 'Projeniz Hakkında Detaylı Bilgi Verin...' : 'Tell me about your project...',
+    send: locale.value === 'tr' ? 'Mesaj Gönder' : 'Send Message',
+    sending: locale.value === 'tr' ? 'Gönderiliyor...' : 'Sending...',
+    success:
+      locale.value === 'tr'
+        ? 'Mesajınız gönderildi. En kısa sürede dönüş yapacağım.'
+        : 'Your message has been sent. I will get back to you soon.',
+    pending:
+      locale.value === 'tr'
+        ? 'Form ilk kez etkinleştiriliyor. Site sahibi onayladıktan sonra tekrar gönderdiğinizde mesajınız iletilecek.'
+        : 'The form is being activated for the first time. Once the owner confirms it, your next message will be delivered.',
+    error:
+      locale.value === 'tr'
+        ? 'Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin veya doğrudan e-posta gönderin.'
+        : 'Message could not be sent. Please try again later or email directly.',
+  },
   readout: {
     file: 'yilmaz.profile',
     rows:
       locale.value === 'tr'
         ? [
-            { k: 'DURUM', v: 'Açık — staj & proje', dot: true },
+            { k: 'DURUM', v: 'Çalışıyor · Yazılım Destek Uzmanı — Freelance\'a açık', dot: true },
             { k: 'ODAK', v: 'Backend · Yapay Zeka · Full-stack' },
-            { k: 'ŞİRKET', v: 'Seneka Yazılım — stajyer' },
+            { k: 'ŞİRKET', v: 'Seneka Yazılım' },
             { k: 'KONUM', v: 'Türkiye' },
             { k: 'YIĞIN', v: 'Java · C# · Spring · .NET · Vue' },
           ]
         : [
-            { k: 'STATUS', v: ' Technical Presales', dot: true },
+            { k: 'STATUS', v: 'Working · Software Support Specialist — Open to freelance', dot: true },
             { k: 'FOCUS', v: 'Backend · AI · Full-stack' },
-            { k: 'COMPANY', v: 'Seneka Yazılım — intern' },
+            { k: 'COMPANY', v: 'Seneka Yazılım' },
             { k: 'LOCATION', v: 'Türkiye' },
             { k: 'STACK', v: 'Java · C# · Spring · .NET · Vue' },
           ],
@@ -349,14 +375,114 @@ const projectsEn = [
 ]
 
 const experiencesTr = [
-  { company: 'Seneka Yazılım', role: 'Uzun dönem stajyer', duration: 'Devam ediyor', description: 'Ürün geliştirme, ürün iyileştirme, entegrasyon.' },
-  { company: 'Acun Medya Akademi', role: 'Gönüllü staj', duration: '5 ay', description: 'Java, Spring ve API entegrasyonu üzerine yoğun proje geliştirme.' },
-  { company: 'Motto Elektrik AŞ', role: 'Stajyer', duration: '1 ay', description: 'Donanımsal süreçlerin yanı sıra web sayfası frontend güncellemeleri ve ürün yönetimi.' },
+  {
+    company: 'Seneka Yazılım',
+    role: 'Yazılım Destek Uzmanı',
+    badge: 'Personel',
+    date: 'Ağustos 2026 - Güncel',
+    duration: 'Güncel',
+    description:
+      'Ürün güncelleştirmeleri, iyileştirmeleri ve testleri; sunucu bakımları, sunucu siber güvenlik testleri, güncelleme dağıtımı, teknik destek talepleri, toplantı yöneticiliği ve sunum konuşmacılığı.',
+  },
+  {
+    company: 'Seneka Yazılım',
+    role: 'Satış Öncesi Teknik Uzmanı',
+    badge: 'Staj',
+    date: 'Haziran 2026 - Ağustos 2026',
+    duration: '2 ay',
+    description:
+      'Potansiyel ve mevcut müşteri toplantıları moderatörlüğü, yönetimi ve sunum konuşmacılığı.',
+  },
+  {
+    company: 'Seneka Yazılım',
+    role: 'Yazılım Geliştirme Stajyeri',
+    badge: 'Staj',
+    date: 'Şubat 2026 - Haziran 2026',
+    duration: '4 ay',
+    highlight: 'Elektronik Belge Yönetim Sistemi, ONAYLARIM e-İmza platformu, PrimeAPI',
+    description: ' ürünlerinde geliştirme, test etme ve güncelleme işlemleri.',
+  },
+  {
+    company: 'Acun Medya Akademi',
+    role: 'Gönüllü Stajyer',
+    badge: 'Gönüllü Staj',
+    date: '',
+    duration: '',
+    description:
+      'Java, Spring, Spring Boot, API ve Swagger teknolojileriyle web projesi geliştirme ve proje yayınlama.',
+  },
+  {
+    company: 'Motto Elektrik AŞ',
+    role: 'Stajyer',
+    badge: 'Staj',
+    date: 'Temmuz 2025',
+    duration: '1.5 ay',
+    description:
+      'Anakart tasarımları, elektronik devre elemanları, mantık devreleri, dizgi makinesi ile dizgi, lehimleme ve web sitesi tasarımı.',
+  },
+  {
+    company: 'Nova Academy Konya',
+    role: 'Yazılım Geliştirme Eğitmeni',
+    badge: 'Eğitmen',
+    date: 'Temmuz 2024',
+    duration: '1 ay',
+    description: 'Çocuklara yönelik yazılım geliştirme öğretmenliği.',
+  },
 ]
 const experiencesEn = [
-  { company: 'Seneka Yazılım', role: 'Long-term intern', duration: 'Ongoing', description: 'Product development, product improvement, integration.' },
-  { company: 'Acun Medya Akademi', role: 'Voluntary internship', duration: '5 months', description: 'Intensive project development on Java, Spring and API integration.' },
-  { company: 'Motto Elektrik AŞ', role: 'Intern', duration: '1 month', description: 'Web frontend updates and product management alongside hardware processes.' },
+  {
+    company: 'Seneka Yazılım',
+    role: 'Software Support Specialist',
+    badge: 'Staff',
+    date: 'August 2026 - Present',
+    duration: 'Present',
+    description:
+      'Product updates, improvements and testing; server maintenance, server cyber-security testing, update deployment, technical support requests, meeting management and presentation speaking.',
+  },
+  {
+    company: 'Seneka Yazılım',
+    role: 'Pre-Sales Technical Specialist',
+    badge: 'Internship',
+    date: 'June 2026 - August 2026',
+    duration: '2 months',
+    description:
+      'Moderation and management of potential and existing customer meetings, and presentation speaking.',
+  },
+  {
+    company: 'Seneka Yazılım',
+    role: 'Software Development Intern',
+    badge: 'Internship',
+    date: 'February 2026 - June 2026',
+    duration: '4 months',
+    highlight: 'Electronic Document Management System, ONAYLARIM e-Signature platform, PrimeAPI',
+    description: ' — development, testing and update work on these products.',
+  },
+  {
+    company: 'Acun Medya Akademi',
+    role: 'Volunteer Intern',
+    badge: 'Volunteer',
+    date: '',
+    duration: '',
+    description:
+      'Web project development and deployment with Java, Spring, Spring Boot, API and Swagger technologies.',
+  },
+  {
+    company: 'Motto Elektrik AŞ',
+    role: 'Intern',
+    badge: 'Internship',
+    date: 'July 2025',
+    duration: '1.5 months',
+    description:
+      'Mainboard design, electronic circuit components, logic circuits, SMT placement, soldering and website design.',
+  },
+  {
+    company: 'Nova Academy Konya',
+    role: 'Software Development Instructor',
+    badge: 'Instructor',
+    date: 'July 2024',
+    duration: '1 month',
+    description: 'Teaching software development to children.',
+  },
 ]
 
 const educationsTr = [
@@ -397,12 +523,77 @@ const skillCategories = [
   { name: 'Tools', items: ['IntelliJ IDEA', 'Remotion', 'Redmine', 'Adobe Illustrator', 'After Effects'] },
 ]
 
+const teammates = [
+  {
+    name: 'Cursor',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></svg>',
+  },
+  {
+    name: 'Claude',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>',
+  },
+  {
+    name: 'Gemini',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg>',
+  },
+  {
+    name: 'ChatGPT',
+    svg: '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>',
+  },
+  {
+    name: 'Yılmaz Sayar',
+    svg: '<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><text x="32" y="44" text-anchor="middle" font-family="\'Space Grotesk\', ui-sans-serif, sans-serif" font-size="34" font-weight="700" letter-spacing="1" fill="currentColor">YS</text></svg>',
+  },
+]
+
 const contactLinks = [
   { label: 'GitHub', href: 'https://github.com/YilmazSayar', icon: 'GitHub' },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/y%C4%B1lmaz-sayar?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app', icon: 'LinkedIn' },
 ]
 
 const EMAIL_ADDRESS = 'sayaryilmaz2004@gmail.com'
+
+/* İletişim formu — FormSubmit.co (ücretsiz, üyelik gerektirmez) üzerinden
+   mesajları doğrudan e-posta adresine iletir. İlk gönderimde tek seferlik
+   bir onay e-postası gelir; onaylandıktan sonra tüm mesajlar gelen kutusuna düşer. */
+const contactForm = ref({ name: '', email: '', subject: '', message: '' })
+const contactStatus = ref('idle') // 'idle' | 'sending' | 'success' | 'pending' | 'error'
+
+async function submitContactForm() {
+  if (contactStatus.value === 'sending') return
+  contactStatus.value = 'sending'
+  try {
+    const res = await fetch(`https://formsubmit.co/ajax/${EMAIL_ADDRESS}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        name: contactForm.value.name,
+        email: contactForm.value.email,
+        _subject:
+          contactForm.value.subject ||
+          (locale.value === 'tr' ? 'Portföy iletişim formu' : 'Portfolio contact form'),
+        message: contactForm.value.message,
+        _template: 'table',
+        _captcha: 'false',
+      }),
+    })
+    const data = await res.json().catch(() => ({}))
+    const succeeded = res.ok && data.success !== false && data.success !== 'false'
+    if (succeeded) {
+      contactStatus.value = 'success'
+      contactForm.value = { name: '', email: '', subject: '', message: '' }
+      return
+    }
+    // FormSubmit tek seferlik aktivasyon isterse bunu kullanıcıya ayrı bildir.
+    if (/activat/i.test(data.message || '')) {
+      contactStatus.value = 'pending'
+      return
+    }
+    throw new Error(data.message || 'request failed')
+  } catch (_) {
+    contactStatus.value = 'error'
+  }
+}
 
 const cvPdfUrl = '/YILMAZSAYAR-CV.pdf'
 const cvDownloadFilename = 'Yilmaz-Sayar-CV.pdf'
@@ -434,8 +625,8 @@ async function downloadCv(e) {
   }
 }
 
-const aboutTextTr = `Selçuk Üniversitesi Bilgisayar Mühendisliği 4. sınıf öğrencisiyim. Yazılım projelerimi makine öğrenmesi ve yapay zeka ile birleştirmeye odaklanan bir mühendis adayıyım. Full stack geliştirme, API tasarımı ve modern web teknolojileri ile ilgileniyorum. Şu anda iş yeri eğitim stajımı yapmaktayım ve Seneka Yazılım bünyesinde ürün geliştirmeleri, ürün iyileştirmeleri ve entegrasyon gibi alanlarda çalışmalar yapıyorum. Kullanıcı taleplerine göre çözüm üretiyor, ürün güncellemelerinde görev alıyorum.`
-const aboutTextEn = `I am a 4th year Computer Engineering student at Selçuk University. I am an aspiring engineer focused on combining software projects with machine learning and artificial intelligence. I am interested in full stack development, API design and modern web technologies. I am currently doing my workplace training internship at Seneka Yazılım, working on product development, product improvement and integration. I find solutions based on user needs and take part in product updates.`
+const aboutTextTr = `Selçuk Üniversitesi Bilgisayar Mühendisliği 4. sınıf öğrencisiyim. Yazılım projelerimi makine öğrenmesi ve yapay zeka ile birleştirmeye odaklanan bir mühendis adayıyım. Full stack geliştirme, API tasarımı ve modern web teknolojileri ile ilgileniyorum. Şu anda Seneka Yazılım bünyesinde aldığım birçok eğitim ve çalıştığım birçok alan sonucunda her alanda çalışma yapabileceğim, Yazılım Destek Uzmanlığı pozisyonunda çalışmaktayım. Bu alanda ürün geliştirmeleri, ürün iyileştirmeleri, entegrasyon, toplantı yöneticiliği, sunucu bakımları, sunucu siber güvenlik testleri, güncelleme dağıtımı, teknik destek talepleri ve sunum konuşmacılığı alanlarında çalışmalar yapıyorum. Kullanıcı taleplerine göre çözüm üretiyor, yapay zeka araçlarını etkin şekilde kullanıyorum. Kariyerimde her zaman kendimi gösterebilecek bir ışık arıyor ve bilgim olmayan her konu için endişe duyarak bilgi ediniyorum. Yazılım dünyası benim için bir oyun oynamak gibi ve ben bir oyun bağımlısıyım.`
+const aboutTextEn = `I am a 4th year Computer Engineering student at Selçuk University. I am an aspiring engineer focused on combining software projects with machine learning and artificial intelligence. I am interested in full stack development, API design and modern web technologies. Thanks to the many trainings I have received and the many areas I have worked in at Seneka Yazılım, I now work as a Software Support Specialist, a role in which I can contribute across every area. In this position I work on product development, product improvements, integration, meeting management, server maintenance, server cyber-security testing, update deployment, technical support requests and presentation speaking. I produce solutions based on user needs and use AI tools effectively. Throughout my career I am always looking for a spark where I can prove myself, and I approach every topic I do not yet know with a healthy concern that drives me to learn it. The world of software feels like playing a game to me, and I am a game addict.`
 const aboutText = computed(() => (locale.value === 'tr' ? aboutTextTr : aboutTextEn))
 
 const currentYear = new Date().getFullYear()
@@ -641,10 +832,16 @@ const currentYear = new Date().getFullYear()
             <div v-for="(exp, i) in experiences" :key="i" class="tl__item" data-reveal>
               <div class="tl__head">
                 <span class="tl__company">{{ exp.company }}</span>
-                <span class="tl__dur mono">{{ exp.duration }}</span>
+                <span v-if="exp.duration" class="tl__dur mono">{{ exp.duration }}</span>
               </div>
-              <p class="tl__role">{{ exp.role }}</p>
-              <p class="tl__desc">{{ exp.description }}</p>
+              <p class="tl__role">
+                <span>{{ exp.role }}</span>
+                <span v-if="exp.badge" class="tl__badge">{{ exp.badge }}</span>
+              </p>
+              <p v-if="exp.date" class="tl__date mono">{{ exp.date }}</p>
+              <p class="tl__desc">
+                <span v-if="exp.highlight" class="tl__hl">{{ exp.highlight }}</span>{{ exp.description }}
+              </p>
             </div>
           </div>
         </div>
@@ -712,7 +909,78 @@ const currentYear = new Date().getFullYear()
             <p style="max-width: 48ch; font-size: var(--text-md); color: var(--color-ink-2); margin-bottom: var(--space-lg)">
               {{ t.labels.contactLead }}
             </p>
-            <div class="flex flex-wrap items-center gap-3">
+
+            <form class="card contact-form" @submit.prevent="submitContactForm">
+              <div class="contact-form__row">
+                <div class="contact-form__field">
+                  <label class="contact-form__label" for="cf-name">{{ t.form.name }}</label>
+                  <input
+                    id="cf-name"
+                    v-model="contactForm.name"
+                    type="text"
+                    class="contact-form__input"
+                    :placeholder="t.form.namePlaceholder"
+                    autocomplete="name"
+                    required
+                  />
+                </div>
+                <div class="contact-form__field">
+                  <label class="contact-form__label" for="cf-mail">{{ t.form.mail }}</label>
+                  <input
+                    id="cf-mail"
+                    v-model="contactForm.email"
+                    type="email"
+                    class="contact-form__input"
+                    :placeholder="t.form.mailPlaceholder"
+                    autocomplete="email"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="contact-form__field">
+                <label class="contact-form__label" for="cf-subject">{{ t.form.subject }}</label>
+                <input
+                  id="cf-subject"
+                  v-model="contactForm.subject"
+                  type="text"
+                  class="contact-form__input"
+                  :placeholder="t.form.subjectPlaceholder"
+                />
+              </div>
+
+              <div class="contact-form__field">
+                <label class="contact-form__label" for="cf-message">{{ t.form.message }}</label>
+                <textarea
+                  id="cf-message"
+                  v-model="contactForm.message"
+                  class="contact-form__input contact-form__textarea"
+                  :placeholder="t.form.messagePlaceholder"
+                  rows="5"
+                  required
+                ></textarea>
+              </div>
+
+              <p v-if="contactStatus === 'success'" class="contact-form__status contact-form__status--ok" role="status">
+                {{ t.form.success }}
+              </p>
+              <p v-else-if="contactStatus === 'pending'" class="contact-form__status contact-form__status--pending" role="status">
+                {{ t.form.pending }}
+              </p>
+              <p v-else-if="contactStatus === 'error'" class="contact-form__status contact-form__status--err" role="alert">
+                {{ t.form.error }}
+              </p>
+
+              <button type="submit" class="btn btn--primary contact-form__submit" :disabled="contactStatus === 'sending'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m22 2-7 20-4-9-9-4Z" />
+                  <path d="M22 2 11 13" />
+                </svg>
+                <span>{{ contactStatus === 'sending' ? t.form.sending : t.form.send }}</span>
+              </button>
+            </form>
+
+            <div class="flex flex-wrap items-center gap-3" style="margin-top: var(--space-xl)">
               <a
                 v-for="link in contactLinks"
                 :key="link.icon"
@@ -740,12 +1008,32 @@ const currentYear = new Date().getFullYear()
           </div>
         </div>
       </section>
+
+      <!-- Teammates -->
+      <section id="ekip" class="section">
+        <div class="wrap" style="padding-block: var(--space-3xl)">
+          <div class="section__head" data-reveal>
+            <h2 class="section__title section__title--script">{{ t.sections.team }}</h2>
+          </div>
+          <div class="team-grid" data-reveal>
+            <div v-for="mate in teammates" :key="mate.name" class="team-card" tabindex="0">
+              <div class="team-card__inner">
+                <div class="team-card__face team-card__face--front">
+                  <span class="team-card__icon" v-html="mate.svg"></span>
+                </div>
+                <div class="team-card__face team-card__face--back">
+                  <span class="team-card__name">{{ mate.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- Footer -->
     <footer class="foot">
       <div class="wrap">
-        <p class="foot__statement">{{ t.footStatement }}</p>
         <div class="foot__bar">
           <span class="foot__meta">© {{ currentYear }} Yılmaz Sayar</span>
           <span class="foot__meta">{{ t.hero.role }} · Türkiye</span>
