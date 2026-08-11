@@ -579,12 +579,23 @@ onUnmounted(() => {
 @media (max-width: 900px) {
   .watchers {
     min-height: 280px;
+    justify-items: center;
   }
   .watchers__stage {
     width: min(100%, 360px);
     height: 300px;
     min-height: 280px;
     margin-left: 0;
+    margin-inline: auto;
+  }
+  /* Masaüstündeki sağa kaymayı mobilde geri al — grubu ortala */
+  .watcher--tall { left: 10%; }
+  .watcher--slim { left: 44%; }
+  .watcher--mound { left: 2%; }
+  .watcher--arch { right: 0; }
+  .watchers--lean .watchers__stage,
+  .watchers--away .watchers__stage {
+    /* lean/away kayması mobilde de ortalanmış gruba göre kalsın */
   }
 }
 
