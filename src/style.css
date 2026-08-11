@@ -725,6 +725,32 @@ body {
 }
 
 /* Contact form */
+.contact-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.95fr);
+  gap: var(--space-xl);
+  align-items: stretch;
+}
+.contact-layout__main {
+  min-width: 0;
+}
+.contact-layout__watchers {
+  min-height: 480px;
+  align-self: stretch;
+  display: flex;
+}
+@media (max-width: 900px) {
+  .contact-layout {
+    grid-template-columns: 1fr;
+  }
+  .contact-layout__watchers {
+    min-height: 280px;
+    max-width: 420px;
+    margin-inline: auto;
+    width: 100%;
+  }
+}
+
 .contact-form {
   display: flex;
   flex-direction: column;
