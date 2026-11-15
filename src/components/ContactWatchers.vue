@@ -578,11 +578,14 @@ onUnmounted(() => {
 
 @media (max-width: 900px) {
   .watchers {
+    display: block;
     min-height: 280px;
-    justify-items: center;
   }
+  /* Ortalanmış grid/flex içinde min(100%,…) genişliği 0'a çöküyordu —
+     sadece gözler taşıp görünüyordu. Sabit genişlik + max-width kullan. */
   .watchers__stage {
-    width: min(100%, 360px);
+    width: 100%;
+    max-width: 360px;
     height: 300px;
     min-height: 280px;
     margin-left: 0;
